@@ -1,730 +1,340 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pokenmon go2</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pokenmon go2</title>
 
-<style>
-* {
-  box-sizing: border-box;
-}
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: #87ceeb;
+      touch-action: none;
+    }
 
-body {
-  margin: 0;
-  overflow: hidden;
-  font-family: Arial, sans-serif;
-  touch-action: none;
-}
+    #game {
+      position: fixed;
+      inset: 0;
+    }
 
-#game {
-  width: 100vw;
-  height: 100vh;
-}
+    #ui {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 10;
+      pointer-events: none;
+    }
 
-#title {
-  position: fixed;
-  top: 15px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: white;
-  padding: 10px 18px;
-  border-radius: 15px;
-  font-weight: bold;
-  z-index: 20;
-}
+    #title {
+      display: inline-block;
+      background: rgba(0,0,0,0.65);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: bold;
+    }
 
-#gpsButton {
-  position: fixed;
-  top: 65px;
-  right: 15px;
-  border: none;
-  background: white;
-  padding: 12px 15px;
-  border-radius: 15px;
-  font-weight: bold;
-  z-index: 20;
-}
+    #gpsButton,
+    #collectionButton {
+      pointer-events: auto;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: bold;
+      color: white;
+      background: #333;
+    }
 
-#collectionButton {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  border: none;
-  background: white;
-  padding: 12px 15px;
-  border-radius: 15px;
-  font-weight: bold;
-  z-index: 20;
-}
+    #collectionButton {
+      background: #7b3ff2;
+    }
 
-#locationStatus {
-  position: fixed;
-  top: 110px;
-  right: 15px;
-  background: white;
-  padding: 8px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  z-index: 20;
-}
+    #locationStatus {
+      color: white;
+      background: rgba(0,0,0,0.6);
+      padding: 7px 10px;
+      border-radius: 10px;
+      margin-top: 6px;
+      display: inline-block;
+      font-size: 13px;
+    }
 
-#joystick {
-  position: fixed;
-  bottom: 30px;
-  left: 30px;
-  width: 120px;
-  height: 120px;
-  background: rgba(255,255,255,0.35);
-  border: 3px solid white;
-  border-radius: 50%;
-  z-index: 20;
-}
+    #message {
+      position: fixed;
+      left: 50%;
+      bottom: 135px;
+      transform: translateX(-50%);
+      z-index: 20;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 12px 18px;
+      border-radius: 14px;
+      display: none;
+      text-align: center;
+      max-width: 80%;
+    }
 
-#stick {
-  position: absolute;
-  width: 55px;
-  height: 55px;
-  left: 32px;
-  top: 32px;
-  background: rgba(50,50,50,0.7);
-  border-radius: 50%;
-}
+    #collection {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0,0,0,0.9);
+      color: white;
+      display: none;
+      padding: 25px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
 
-#message {
-  display: none;
-  position: fixed;
-  left: 50%;
-  bottom: 180px;
-  transform: translateX(-50%);
-  background: white;
-  padding: 15px 22px;
-  border-radius: 18px;
-  font-size: 17px;
-  font-weight: bold;
-  text-align: center;
-  z-index: 40;
-}
+    #collection h2 {
+      margin-top: 0;
+    }
 
-#catchScreen,
-#collectionScreen {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.72);
-  z-index: 50;
-  align-items: center;
-  justify-content: center;
-}
+    .monsterCard {
+      background: #222;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 10px 0;
+      font-size: 18px;
+    }
 
-.panel {
-  width: 85%;
-  max-width: 360px;
-  background: white;
-  border-radius: 25px;
-  padding: 25px;
-  text-align: center;
-}
+    #closeCollection {
+      border: none;
+      background: #e74c3c;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-weight: bold;
+    }
 
-.monsterIcon {
-  font-size: 90px;
-}
+    #joystick {
+      position: fixed;
+      left: 25px;
+      bottom: 25px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.25);
+      z-index: 15;
+    }
 
-.orb {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: 5px solid #222;
-  background: linear-gradient(
-    #55aaff 0%,
-    #55aaff 48%,
-    white 48%,
-    white 52%,
-    #eeeeee 52%
-  );
-  margin: 20px auto;
-  display: block;
-}
+    #stick {
+      position: absolute;
+      left: 35px;
+      top: 35px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.75);
+    }
 
-.closeButton {
-  border: none;
-  background: #ddd;
-  padding: 13px 22px;
-  border-radius: 15px;
-  font-weight: bold;
-  font-size: 16px;
-}
+    #catchScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: rgba(20,20,20,0.95);
+      color: white;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+    }
 
-#collectionList {
-  max-height: 260px;
-  overflow-y: auto;
-}
+    #catchMonster {
+      font-size: 100px;
+      margin: 20px;
+    }
 
-.monsterCard {
-  background: #f0f0f0;
-  margin: 8px 0;
-  padding: 12px;
-  border-radius: 15px;
-  font-weight: bold;
-}
-</style>
+    #throwButton,
+    #cancelButton {
+      border: none;
+      border-radius: 15px;
+      padding: 14px 25px;
+      margin: 6px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #throwButton {
+      background: #ff8c00;
+      color: white;
+    }
+
+    #cancelButton {
+      background: #555;
+      color: white;
+    }
+  </style>
 </head>
 
 <body>
 
-<div id="title">🌍 Pokenmon go2</div>
+<div id="game"></div>
 
-<button id="collectionButton">
-🎒 Mijn monsters
-</button>
+<div id="ui">
+  <div id="title">🌍 Pokenmon go2</div><br>
 
-<button id="gpsButton">
-📍 GPS
-</button>
+  <button id="gpsButton">📍 GPS starten</button>
+  <button id="collectionButton">🎒 Mijn monsters</button>
 
-<div id="locationStatus">
-GPS: niet actief
+  <div id="locationStatus">
+    GPS staat uit
+  </div>
 </div>
 
-<div id="game"></div>
+<div id="message"></div>
 
 <div id="joystick">
   <div id="stick"></div>
 </div>
 
-<div id="message"></div>
-
-
-<!-- VANGSCHERM -->
+<div id="collection">
+  <h2>🎒 Mijn monsters</h2>
+  <div id="monsterList"></div>
+  <button id="closeCollection">Sluiten</button>
+</div>
 
 <div id="catchScreen">
-
-  <div class="panel">
-
-    <h2 id="catchTitle">
-      👾 Monster gevonden!
-    </h2>
-
-    <div
-      class="monsterIcon"
-      id="catchIcon">
-      👾
-    </div>
-
-    <p id="catchDescription">
-      Je bent dichtbij!
-    </p>
-
-    <button
-      class="orb"
-      id="orbButton">
-    </button>
-
-    <p id="catchText">
-      Tik op de Monster Orb!
-    </p>
-
-    <button
-      class="closeButton"
-      id="closeCatch">
-      Terug
-    </button>
-
-  </div>
-
+  <h1>Een monster!</h1>
+  <div id="catchMonster">👾</div>
+  <div id="catchName">Monster</div>
+  <button id="throwButton">🟠 Gooi Monster Orb</button>
+  <button id="cancelButton">Terug</button>
 </div>
-
-
-<!-- VERZAMELING -->
-
-<div id="collectionScreen">
-
-  <div class="panel">
-
-    <h2>🎒 Mijn monsters</h2>
-
-    <div id="collectionList"></div>
-
-    <button
-      class="closeButton"
-      id="closeCollection">
-      Sluiten
-    </button>
-
-  </div>
-
-</div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
+/* =========================
+   BASIS
+========================= */
 
-// ==================================================
-// BASIS
-// ==================================================
+const scene = new THREE.Scene();
 
-const scene =
-  new THREE.Scene();
+scene.background = new THREE.Color(0x87ceeb);
 
-scene.background =
-  new THREE.Color(
-    0x87ceeb
-  );
-
-
-// ==================================================
-// CAMERA
-// ==================================================
-
-const camera =
-  new THREE.PerspectiveCamera(
-    70,
-    window.innerWidth /
-    window.innerHeight,
-    0.1,
-    1000
-  );
-
-camera.position.set(
-  0,
-  7,
-  12
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
 );
 
+const renderer = new THREE.WebGLRenderer({
+  antialias: true
+});
 
-// ==================================================
-// RENDERER
-// ==================================================
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-const renderer =
-  new THREE.WebGLRenderer({
-    antialias: true
-  });
+document.getElementById("game").appendChild(renderer.domElement);
 
-renderer.setSize(
-  window.innerWidth,
-  window.innerHeight
+
+/* =========================
+   LICHT
+========================= */
+
+const sunlight = new THREE.DirectionalLight(0xffffff, 1);
+sunlight.position.set(20, 30, 10);
+scene.add(sunlight);
+
+const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+scene.add(ambient);
+
+
+/* =========================
+   GROND
+========================= */
+
+const groundGeometry = new THREE.PlaneGeometry(500, 500);
+const groundMaterial = new THREE.MeshLambertMaterial({
+  color: 0x4caf50
+});
+
+const ground = new THREE.Mesh(
+  groundGeometry,
+  groundMaterial
 );
 
-renderer.setPixelRatio(
-  Math.min(
-    window.devicePixelRatio,
-    2
-  )
-);
-
-document
-  .getElementById("game")
-  .appendChild(renderer.domElement);
-
-
-// ==================================================
-// LICHT
-// ==================================================
-
-const sun =
-  new THREE.DirectionalLight(
-    0xffffff,
-    2
-  );
-
-sun.position.set(
-  10,
-  20,
-  10
-);
-
-scene.add(sun);
-
-scene.add(
-  new THREE.AmbientLight(
-    0xffffff,
-    0.6
-  )
-);
-
-
-// ==================================================
-// GROND
-// ==================================================
-
-const ground =
-  new THREE.Mesh(
-    new THREE.PlaneGeometry(
-      150,
-      150
-    ),
-    new THREE.MeshStandardMaterial({
-      color: 0x55aa55
-    })
-  );
-
-ground.rotation.x =
-  -Math.PI / 2;
-
+ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
 
-// ==================================================
-// WEGEN
-// ==================================================
+/* =========================
+   WEG
+========================= */
 
-function createRoad(
-  x,
-  z,
-  width,
-  length,
-  rotation = 0
-) {
+const roadGeometry = new THREE.PlaneGeometry(15, 500);
 
-  const road =
-    new THREE.Mesh(
-      new THREE.PlaneGeometry(
-        width,
-        length
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0x777777
-      })
-    );
+const roadMaterial = new THREE.MeshLambertMaterial({
+  color: 0x555555
+});
 
-  road.rotation.x =
-    -Math.PI / 2;
-
-  road.rotation.z =
-    rotation;
-
-  road.position.set(
-    x,
-    0.02,
-    z
-  );
-
-  scene.add(road);
-}
-
-createRoad(
-  0,
-  0,
-  8,
-  150
+const road = new THREE.Mesh(
+  roadGeometry,
+  roadMaterial
 );
 
-createRoad(
-  0,
-  0,
-  8,
-  150,
-  Math.PI / 2
+road.rotation.x = -Math.PI / 2;
+road.position.y = 0.01;
+
+scene.add(road);
+
+
+/* =========================
+   SPELER
+========================= */
+
+const playerGeometry = new THREE.BoxGeometry(1.5, 2, 1.5);
+
+const playerMaterial = new THREE.MeshLambertMaterial({
+  color: 0x2196f3
+});
+
+const player = new THREE.Mesh(
+  playerGeometry,
+  playerMaterial
 );
 
-
-// ==================================================
-// BOMEN
-// ==================================================
-
-function createTree(
-  x,
-  z
-) {
-
-  const tree =
-    new THREE.Group();
-
-
-  const trunk =
-    new THREE.Mesh(
-      new THREE.CylinderGeometry(
-        0.3,
-        0.4,
-        2,
-        10
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0x8b5a2b
-      })
-    );
-
-  trunk.position.y = 1;
-
-  tree.add(trunk);
-
-
-  const leaves =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        1.4,
-        12,
-        12
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0x228b22
-      })
-    );
-
-  leaves.position.y = 2.7;
-
-  tree.add(leaves);
-
-
-  tree.position.set(
-    x,
-    0,
-    z
-  );
-
-  scene.add(tree);
-}
-
-
-[
-  [-12,-12],
-  [-18,-4],
-  [-13,10],
-  [-20,15],
-  [12,-15],
-  [18,-8],
-  [14,8],
-  [20,15],
-  [-30,0],
-  [30,0],
-  [0,-25],
-  [0,25]
-].forEach(
-  p => createTree(
-    p[0],
-    p[1]
-  )
-);
-
-
-// ==================================================
-// HUIZEN
-// ==================================================
-
-function createHouse(
-  x,
-  z
-) {
-
-  const house =
-    new THREE.Group();
-
-
-  const base =
-    new THREE.Mesh(
-      new THREE.BoxGeometry(
-        4,
-        3,
-        4
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0xffcc88
-      })
-    );
-
-  base.position.y = 1.5;
-
-  house.add(base);
-
-
-  const roof =
-    new THREE.Mesh(
-      new THREE.ConeGeometry(
-        3.2,
-        2,
-        4
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0xcc4444
-      })
-    );
-
-  roof.position.y = 4;
-
-  roof.rotation.y =
-    Math.PI / 4;
-
-  house.add(roof);
-
-
-  house.position.set(
-    x,
-    0,
-    z
-  );
-
-  scene.add(house);
-}
-
-
-createHouse(
-  -10,
-  10
-);
-
-createHouse(
-  10,
-  10
-);
-
-
-// ==================================================
-// SPELER
-// ==================================================
-
-const player =
-  new THREE.Mesh(
-    new THREE.BoxGeometry(
-      1,
-      2,
-      1
-    ),
-    new THREE.MeshStandardMaterial({
-      color: 0x3366ff
-    })
-  );
-
-player.position.set(
-  0,
-  1,
-  0
-);
+player.position.set(0, 1, 0);
 
 scene.add(player);
 
 
-// ==================================================
-// MONSTER FUNCTIE
-// ==================================================
+/* =========================
+   MONSTERS
+========================= */
 
 const monsters = [];
 
+function createMonster(name, emoji, x, z) {
 
-function createMonster(
-  name,
-  emoji,
-  color,
-  x,
-  z
-) {
+  const geometry = new THREE.SphereGeometry(1.2, 24, 24);
 
-  const monster =
-    new THREE.Group();
+  let color = 0xff9800;
 
+  if (name === "Leafy") color = 0x4caf50;
+  if (name === "Aquari") color = 0x2196f3;
 
-  const body =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        1,
-        20,
-        20
-      ),
-      new THREE.MeshStandardMaterial({
-        color: color
-      })
-    );
+  const material = new THREE.MeshLambertMaterial({
+    color: color
+  });
 
-  body.position.y = 1.2;
-
-  monster.add(body);
-
-
-  const eyeMaterial =
-    new THREE.MeshStandardMaterial({
-      color: 0xffffff
-    });
-
-
-  const pupilMaterial =
-    new THREE.MeshStandardMaterial({
-      color: 0x111111
-    });
-
-
-  const leftEye =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        0.18,
-        12,
-        12
-      ),
-      eyeMaterial
-    );
-
-  leftEye.position.set(
-    -0.35,
-    1.5,
-    -0.85
+  const monster = new THREE.Mesh(
+    geometry,
+    material
   );
 
-  monster.add(leftEye);
-
-
-  const rightEye =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        0.18,
-        12,
-        12
-      ),
-      eyeMaterial
-    );
-
-  rightEye.position.set(
-    0.35,
-    1.5,
-    -0.85
-  );
-
-  monster.add(rightEye);
-
-
-  const leftPupil =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        0.08,
-        10,
-        10
-      ),
-      pupilMaterial
-    );
-
-  leftPupil.position.set(
-    -0.35,
-    1.5,
-    -1
-  );
-
-  monster.add(leftPupil);
-
-
-  const rightPupil =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        0.08,
-        10,
-        10
-      ),
-      pupilMaterial
-    );
-
-  rightPupil.position.set(
-    0.35,
-    1.5,
-    -1
-  );
-
-  monster.add(rightPupil);
-
-
-  monster.position.set(
-    x,
-    0,
-    z
-  );
-
+  monster.position.set(x, 1.2, z);
 
   monster.userData = {
     name: name,
@@ -732,74 +342,247 @@ function createMonster(
     caught: false
   };
 
-
   scene.add(monster);
-
   monsters.push(monster);
 }
 
 
-// ==================================================
-// EERSTE MONSTERS
-// ==================================================
+/* Eerste monsters */
 
-createMonster(
-  "Firebo",
-  "🔥",
-  0xff6633,
-  8,
-  -8
+createMonster("Firebo", "🔥", 8, -12);
+createMonster("Leafy", "🌿", -10, -25);
+createMonster("Aquari", "💧", 12, -40);
+
+
+/* =========================
+   BOMEN
+========================= */
+
+function createTree(x, z) {
+
+  const trunk = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.4, 0.5, 2, 8),
+    new THREE.MeshLambertMaterial({
+      color: 0x795548
+    })
+  );
+
+  trunk.position.set(x, 1, z);
+
+  scene.add(trunk);
+
+  const leaves = new THREE.Mesh(
+    new THREE.SphereGeometry(1.8, 12, 12),
+    new THREE.MeshLambertMaterial({
+      color: 0x2e7d32
+    })
+  );
+
+  leaves.position.set(x, 3, z);
+
+  scene.add(leaves);
+}
+
+for (let i = -100; i <= 100; i += 12) {
+  createTree(-12, i);
+  createTree(12, i + 6);
+}
+
+
+/* =========================
+   HUIZEN
+========================= */
+
+function createHouse(x, z) {
+
+  const house = new THREE.Mesh(
+    new THREE.BoxGeometry(5, 4, 5),
+    new THREE.MeshLambertMaterial({
+      color: 0xffcc80
+    })
+  );
+
+  house.position.set(x, 2, z);
+
+  scene.add(house);
+
+  const roof = new THREE.Mesh(
+    new THREE.ConeGeometry(4, 2.5, 4),
+    new THREE.MeshLambertMaterial({
+      color: 0xd84315
+    })
+  );
+
+  roof.position.set(x, 5, z);
+  roof.rotation.y = Math.PI / 4;
+
+  scene.add(roof);
+}
+
+createHouse(-22, -15);
+createHouse(22, -35);
+
+
+/* =========================
+   GPS
+========================= */
+
+let gpsActive = false;
+
+let gpsOriginLat = null;
+let gpsOriginLon = null;
+
+let gpsWatchId = null;
+
+const locationStatus =
+  document.getElementById("locationStatus");
+
+const gpsButton =
+  document.getElementById("gpsButton");
+
+
+function startGPS() {
+
+  if (!navigator.geolocation) {
+
+    locationStatus.textContent =
+      "❌ GPS wordt niet ondersteund.";
+
+    return;
+  }
+
+  locationStatus.textContent =
+    "📡 GPS zoeken...";
+
+  gpsWatchId =
+    navigator.geolocation.watchPosition(
+
+      function(position) {
+
+        const latitude =
+          position.coords.latitude;
+
+        const longitude =
+          position.coords.longitude;
+
+        /*
+          Eerste GPS-positie wordt het startpunt.
+
+          De GPS-gegevens blijven alleen in deze browser.
+        */
+
+        if (gpsOriginLat === null) {
+
+          gpsOriginLat = latitude;
+          gpsOriginLon = longitude;
+
+          locationStatus.textContent =
+            "✅ GPS actief";
+        }
+
+
+        /*
+          Zet GPS om naar meters.
+
+          Ongeveer:
+          1 graad breedte = 111.320 meter
+        */
+
+        const metersPerDegree = 111320;
+
+        const latitudeMeters =
+          (latitude - gpsOriginLat) *
+          metersPerDegree;
+
+        const longitudeMeters =
+          (longitude - gpsOriginLon) *
+          metersPerDegree *
+          Math.cos(
+            gpsOriginLat * Math.PI / 180
+          );
+
+
+        /*
+          Schaal:
+
+          5 meter in de echte wereld
+          = ongeveer 1 game-unit
+        */
+
+        const scale = 5;
+
+        const worldX =
+          longitudeMeters / scale;
+
+        const worldZ =
+          -latitudeMeters / scale;
+
+
+        /*
+          GPS bestuurt nu de speler.
+        */
+
+        player.position.x = worldX;
+        player.position.z = worldZ;
+
+
+        locationStatus.textContent =
+          "📍 GPS actief";
+      },
+
+      function(error) {
+
+        locationStatus.textContent =
+          "❌ GPS kon niet worden gebruikt.";
+
+        console.log(error);
+      },
+
+      {
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 10000
+      }
+    );
+
+  gpsActive = true;
+
+  gpsButton.textContent =
+    "📍 GPS actief";
+}
+
+
+gpsButton.addEventListener(
+  "click",
+  startGPS
 );
 
-createMonster(
-  "Leafy",
-  "🌿",
-  0x33bb55,
-  -8,
-  -10
-);
 
-createMonster(
-  "Aquari",
-  "💧",
-  0x3399ff,
-  12,
-  12
-);
-
-
-// ==================================================
-// JOYSTICK
-// ==================================================
+/* =========================
+   JOYSTICK
+========================= */
 
 const joystick =
-  document.getElementById(
-    "joystick"
-  );
+  document.getElementById("joystick");
 
 const stick =
-  document.getElementById(
-    "stick"
-  );
+  document.getElementById("stick");
 
+let joystickActive = false;
 
 let joystickX = 0;
 let joystickY = 0;
-let touching = false;
 
 
 joystick.addEventListener(
   "touchstart",
   function(event) {
 
-    touching = true;
+    joystickActive = true;
 
     event.preventDefault();
-
   },
-  {
-    passive:false
-  }
+  { passive: false }
 );
 
 
@@ -807,76 +590,50 @@ joystick.addEventListener(
   "touchmove",
   function(event) {
 
-    if (!touching) return;
-
-    event.preventDefault();
-
+    if (!joystickActive) return;
 
     const touch =
       event.touches[0];
 
-
     const rect =
       joystick.getBoundingClientRect();
 
-
     let x =
       touch.clientX -
-      (
-        rect.left +
-        rect.width / 2
-      );
-
+      (rect.left + rect.width / 2);
 
     let y =
       touch.clientY -
-      (
-        rect.top +
-        rect.height / 2
-      );
+      (rect.top + rect.height / 2);
 
-
-    const max = 45;
-
+    const maxDistance = 35;
 
     const distance =
-      Math.sqrt(
-        x*x +
-        y*y
-      );
+      Math.sqrt(x*x + y*y);
 
-
-    if (
-      distance > max
-    ) {
+    if (distance > maxDistance) {
 
       x =
-        x /
-        distance *
-        max;
+        x / distance *
+        maxDistance;
 
       y =
-        y /
-        distance *
-        max;
-
+        y / distance *
+        maxDistance;
     }
 
-
     joystickX =
-      x / max;
+      x / maxDistance;
 
     joystickY =
-      y / max;
-
+      y / maxDistance;
 
     stick.style.transform =
-      `translate(${x}px,${y}px)`;
+      `translate(${x}px, ${y}px)`;
 
+    event.preventDefault();
   },
-  {
-    passive:false
-  }
+  { passive: false }
 );
 
 
@@ -884,595 +641,269 @@ joystick.addEventListener(
   "touchend",
   function() {
 
-    touching = false;
+    joystickActive = false;
 
     joystickX = 0;
     joystickY = 0;
 
     stick.style.transform =
-      "translate(0px,0px)";
-
+      "translate(0px, 0px)";
   }
 );
 
 
-// ==================================================
-// MONSTER AANTIKKEN
-// ==================================================
+/* =========================
+   MONSTER KLIKKEN
+========================= */
 
 let selectedMonster = null;
 
+const catchScreen =
+  document.getElementById("catchScreen");
 
-const raycaster =
-  new THREE.Raycaster();
+const catchMonster =
+  document.getElementById("catchMonster");
 
-const mouse =
-  new THREE.Vector2();
+const catchName =
+  document.getElementById("catchName");
 
 
 renderer.domElement.addEventListener(
   "touchstart",
   function(event) {
 
-    if (
-      event.target.closest(
-        "#joystick"
-      )
-    ) {
-      return;
-    }
-
-
     const touch =
       event.touches[0];
 
+    const mouse =
+      new THREE.Vector2();
 
     mouse.x =
-      (
-        touch.clientX /
-        window.innerWidth
-      ) * 2 - 1;
-
+      (touch.clientX /
+      window.innerWidth) * 2 - 1;
 
     mouse.y =
-      -(
-        touch.clientY /
-        window.innerHeight
-      ) * 2 + 1;
+      -(touch.clientY /
+      window.innerHeight) * 2 + 1;
 
+    const raycaster =
+      new THREE.Raycaster();
 
     raycaster.setFromCamera(
       mouse,
       camera
     );
 
-
-    const objects = [];
-
-
-    monsters.forEach(
-      monster => {
-
-        if (
-          !monster.userData.caught
-        ) {
-
-          monster.children.forEach(
-            child => {
-
-              objects.push(
-                child
-              );
-
-            }
-          );
-
-        }
-
-      }
-    );
-
-
     const hits =
       raycaster.intersectObjects(
-        objects,
-        true
+        monsters
       );
 
+    if (hits.length > 0) {
 
-    if (
-      hits.length === 0
-    ) {
-      return;
+      const monster =
+        hits[0].object;
+
+      if (monster.userData.caught)
+        return;
+
+      const distance =
+        player.position.distanceTo(
+          monster.position
+        );
+
+      if (distance < 8) {
+
+        selectedMonster =
+          monster;
+
+        catchMonster.textContent =
+          monster.userData.emoji;
+
+        catchName.textContent =
+          monster.userData.name;
+
+        catchScreen.style.display =
+          "flex";
+      }
+
+      else {
+
+        showMessage(
+          "🚶 Ga wat dichter bij het monster!"
+        );
+      }
     }
-
-
-    let selected =
-      hits[0].object;
-
-
-    while (
-      selected.parent &&
-      !monsters.includes(
-        selected
-      )
-    ) {
-
-      selected =
-        selected.parent;
-
-    }
-
-
-    if (
-      !monsters.includes(
-        selected
-      )
-    ) {
-      return;
-    }
-
-
-    selectedMonster =
-      selected;
-
-
-    const distance =
-      player.position.distanceTo(
-        selectedMonster.position
-      );
-
-
-    if (
-      distance <= 6
-    ) {
-
-      openCatchScreen(
-        selectedMonster
-      );
-
-    } else {
-
-      showMessage(
-        "🚶 Loop dichter naar het monster!"
-      );
-
-    }
-
   }
 );
 
 
-// ==================================================
-// VANGSCHERM
-// ==================================================
+/* =========================
+   VANGEN
+========================= */
 
-function openCatchScreen(
-  monster
-) {
+const throwButton =
+  document.getElementById("throwButton");
 
-  document
-    .getElementById(
-      "catchTitle"
-    )
-    .innerText =
-    monster.userData.name +
-    " gevonden!";
+throwButton.addEventListener(
+  "click",
+  function() {
+
+    if (!selectedMonster)
+      return;
+
+    selectedMonster.userData.caught =
+      true;
+
+    selectedMonster.visible =
+      false;
+
+    saveMonster(
+      selectedMonster.userData.name,
+      selectedMonster.userData.emoji
+    );
+
+    catchScreen.style.display =
+      "none";
+
+    showMessage(
+      "🎉 Je hebt " +
+      selectedMonster.userData.name +
+      " gevangen!"
+    );
+
+    selectedMonster = null;
+  }
+);
 
 
-  document
-    .getElementById(
-      "catchIcon"
-    )
-    .innerText =
-    monster.userData.emoji;
-
-
-  document
-    .getElementById(
-      "catchScreen"
-    )
-    .style.display =
-    "flex";
-
-}
-
-
-// ==================================================
-// VANGEN
-// ==================================================
+/* =========================
+   ANNULEREN
+========================= */
 
 document
-  .getElementById(
-    "orbButton"
-  )
+  .getElementById("cancelButton")
   .addEventListener(
     "click",
     function() {
 
-      if (
-        !selectedMonster
-      ) {
-        return;
-      }
+      catchScreen.style.display =
+        "none";
 
-
-      if (
-        selectedMonster
-        .userData
-        .caught
-      ) {
-        return;
-      }
-
-
-      document
-        .getElementById(
-          "catchText"
-        )
-        .innerText =
-        "✨ Vangen...";
-
-
-      setTimeout(
-        function() {
-
-          selectedMonster
-            .userData
-            .caught = true;
-
-
-          selectedMonster.visible =
-            false;
-
-
-          saveMonster(
-            selectedMonster
-          );
-
-
-          document
-            .getElementById(
-              "catchText"
-            )
-            .innerText =
-            "🎉 Gevangen!";
-
-
-          setTimeout(
-            function() {
-
-              document
-                .getElementById(
-                  "catchScreen"
-                )
-                .style.display =
-                "none";
-
-
-              updateCollection();
-
-            },
-            1000
-          );
-
-        },
-        700
-      );
-
+      selectedMonster = null;
     }
   );
 
 
-// ==================================================
-// OPSLAAN
-// ==================================================
+/* =========================
+   MONSTERS OPSLAAN
+========================= */
 
 function getCollection() {
 
-  const saved =
+  return JSON.parse(
     localStorage.getItem(
-      "pokenmonGo2Collection"
-    );
-
-
-  if (!saved) {
-    return [];
-  }
-
-
-  try {
-
-    return JSON.parse(
-      saved
-    );
-
-  } catch {
-
-    return [];
-
-  }
-
+      "mijnMonsters"
+    ) || "[]"
+  );
 }
 
 
-function saveMonster(
-  monster
-) {
+function saveMonster(name, emoji) {
 
   const collection =
     getCollection();
-
 
   collection.push({
-    name:
-      monster.userData.name,
-
-    emoji:
-      monster.userData.emoji
+    name: name,
+    emoji: emoji
   });
 
-
   localStorage.setItem(
-    "pokenmonGo2Collection",
-    JSON.stringify(
-      collection
-    )
+    "mijnMonsters",
+    JSON.stringify(collection)
   );
-
 }
 
 
-// ==================================================
-// VERZAMELING
-// ==================================================
+/* =========================
+   COLLECTIE
+========================= */
 
-function updateCollection() {
+const collection =
+  document.getElementById("collection");
 
-  const list =
-    document.getElementById(
-      "collectionList"
-    );
-
-
-  list.innerHTML = "";
-
-
-  const collection =
-    getCollection();
-
-
-  if (
-    collection.length === 0
-  ) {
-
-    list.innerText =
-      "Je hebt nog geen monsters.";
-
-    return;
-
-  }
-
-
-  collection.forEach(
-    monster => {
-
-      const card =
-        document.createElement(
-          "div"
-        );
-
-
-      card.className =
-        "monsterCard";
-
-
-      card.innerText =
-        monster.emoji +
-        " " +
-        monster.name;
-
-
-      list.appendChild(
-        card
-      );
-
-    }
-  );
-
-}
+const monsterList =
+  document.getElementById("monsterList");
 
 
 document
-  .getElementById(
-    "collectionButton"
-  )
+  .getElementById("collectionButton")
   .addEventListener(
     "click",
     function() {
 
-      updateCollection();
+      monsterList.innerHTML = "";
 
-      document
-        .getElementById(
-          "collectionScreen"
-        )
-        .style.display =
-        "flex";
+      const saved =
+        getCollection();
 
+      if (saved.length === 0) {
+
+        monsterList.innerHTML =
+          "<p>Je hebt nog geen monsters.</p>";
+
+      } else {
+
+        saved.forEach(function(monster) {
+
+          const card =
+            document.createElement("div");
+
+          card.className =
+            "monsterCard";
+
+          card.textContent =
+            monster.emoji +
+            " " +
+            monster.name;
+
+          monsterList.appendChild(card);
+        });
+      }
+
+      collection.style.display =
+        "block";
     }
   );
 
 
 document
-  .getElementById(
-    "closeCollection"
-  )
+  .getElementById("closeCollection")
   .addEventListener(
     "click",
     function() {
 
-      document
-        .getElementById(
-          "collectionScreen"
-        )
-        .style.display =
+      collection.style.display =
         "none";
-
     }
   );
 
 
-document
-  .getElementById(
-    "closeCatch"
-  )
-  .addEventListener(
-    "click",
-    function() {
+/* =========================
+   MELDING
+========================= */
 
-      document
-        .getElementById(
-          "catchScreen"
-        )
-        .style.display =
-        "none";
-
-    }
-  );
-
-
-// ==================================================
-// GPS
-// ==================================================
-
-let gpsActive = false;
-
-let lastLatitude = null;
-let lastLongitude = null;
-
-
-function startGPS() {
-
-  if (
-    !navigator.geolocation
-  ) {
-
-    showMessage(
-      "❌ Deze browser ondersteunt geen GPS."
-    );
-
-    return;
-
-  }
-
-
-  document
-    .getElementById(
-      "locationStatus"
-    )
-    .innerText =
-    "GPS: wordt gestart...";
-
-
-  navigator.geolocation.watchPosition(
-
-    function(position) {
-
-      gpsActive = true;
-
-
-      lastLatitude =
-        position.coords.latitude;
-
-
-      lastLongitude =
-        position.coords.longitude;
-
-
-      document
-        .getElementById(
-          "locationStatus"
-        )
-        .innerText =
-        "📍 GPS actief";
-
-
-      // ======================================
-      // GPS wordt gekoppeld aan speler
-      // ======================================
-
-      // Kleine lokale bewegingen.
-      // Hierdoor blijft de speler bestuurbaar
-      // met de joystick.
-
-    },
-
-    function(error) {
-
-      gpsActive = false;
-
-
-      document
-        .getElementById(
-          "locationStatus"
-        )
-        .innerText =
-        "GPS: toestemming nodig";
-
-
-      showMessage(
-        "📍 Geef toestemming voor locatie."
-      );
-
-    },
-
-    {
-      enableHighAccuracy: true,
-      maximumAge: 5000,
-      timeout: 10000
-    }
-
-  );
-
-}
-
-
-document
-  .getElementById(
-    "gpsButton"
-  )
-  .addEventListener(
-    "click",
-    function() {
-
-      startGPS();
-
-    }
-  );
-
-
-// ==================================================
-// MELDING
-// ==================================================
-
-function showMessage(
-  text
-) {
+function showMessage(text) {
 
   const message =
-    document.getElementById(
-      "message"
-    );
+    document.getElementById("message");
 
-
-  message.innerText =
+  message.textContent =
     text;
-
 
   message.style.display =
     "block";
-
 
   setTimeout(
     function() {
@@ -1483,13 +914,12 @@ function showMessage(
     },
     2500
   );
-
 }
 
 
-// ==================================================
-// GAME LOOP
-// ==================================================
+/* =========================
+   CAMERA + BEWEGING
+========================= */
 
 function animate() {
 
@@ -1498,67 +928,63 @@ function animate() {
   );
 
 
-  // Speler bewegen
+  /*
+    Als GPS NIET actief is,
+    werkt de joystick.
 
-  player.position.x +=
-    joystickX * 0.12;
+    Als GPS WEL actief is,
+    bestuurt GPS de speler.
+  */
 
+  if (!gpsActive) {
 
-  player.position.z +=
-    joystickY * 0.12;
+    player.position.x +=
+      joystickX * 0.15;
 
-
-  // Wereldgrenzen
-
-  player.position.x =
-    Math.max(
-      -70,
-      Math.min(
-        70,
-        player.position.x
-      )
-    );
+    player.position.z +=
+      joystickY * 0.15;
+  }
 
 
-  player.position.z =
-    Math.max(
-      -70,
-      Math.min(
-        70,
-        player.position.z
-      )
-    );
-
-
-  // Camera
+  /*
+    Camera volgt speler.
+  */
 
   camera.position.x =
     player.position.x;
 
+  camera.position.y =
+    player.position.y + 12;
 
   camera.position.z =
-    player.position.z + 12;
+    player.position.z + 15;
 
 
   camera.lookAt(
-    player.position
+    player.position.x,
+    player.position.y,
+    player.position.z
   );
 
 
-  // Monsters draaien
+  /*
+    Monsters zweven een beetje.
+  */
 
   monsters.forEach(
-    monster => {
+    function(monster) {
 
-      if (
-        !monster.userData.caught
-      ) {
+      if (!monster.visible)
+        return;
 
-        monster.rotation.y +=
-          0.01;
+      monster.rotation.y += 0.01;
 
-      }
-
+      monster.position.y =
+        1.2 +
+        Math.sin(
+          Date.now() * 0.003 +
+          monster.position.x
+        ) * 0.15;
     }
   );
 
@@ -1567,16 +993,14 @@ function animate() {
     scene,
     camera
   );
-
 }
-
 
 animate();
 
 
-// ==================================================
-// RESIZE
-// ==================================================
+/* =========================
+   SCHERM GROOTTE
+========================= */
 
 window.addEventListener(
   "resize",
@@ -1586,15 +1010,12 @@ window.addEventListener(
       window.innerWidth /
       window.innerHeight;
 
-
     camera.updateProjectionMatrix();
-
 
     renderer.setSize(
       window.innerWidth,
       window.innerHeight
     );
-
   }
 );
 
