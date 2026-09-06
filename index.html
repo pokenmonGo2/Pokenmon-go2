@@ -34,6 +34,18 @@ body {
   z-index: 20;
 }
 
+#gpsButton {
+  position: fixed;
+  top: 65px;
+  right: 15px;
+  border: none;
+  background: white;
+  padding: 12px 15px;
+  border-radius: 15px;
+  font-weight: bold;
+  z-index: 20;
+}
+
 #collectionButton {
   position: fixed;
   top: 15px;
@@ -43,6 +55,17 @@ body {
   padding: 12px 15px;
   border-radius: 15px;
   font-weight: bold;
+  z-index: 20;
+}
+
+#locationStatus {
+  position: fixed;
+  top: 110px;
+  right: 15px;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
   z-index: 20;
 }
 
@@ -123,19 +146,13 @@ body {
   display: block;
 }
 
-.closeButton,
-.mainButton {
+.closeButton {
   border: none;
+  background: #ddd;
   padding: 13px 22px;
   border-radius: 15px;
   font-weight: bold;
   font-size: 16px;
-  margin-top: 8px;
-}
-
-.mainButton {
-  background: #3366ff;
-  color: white;
 }
 
 #collectionList {
@@ -160,6 +177,14 @@ body {
 <button id="collectionButton">
 🎒 Mijn monsters
 </button>
+
+<button id="gpsButton">
+📍 GPS
+</button>
+
+<div id="locationStatus">
+GPS: niet actief
+</div>
 
 <div id="game"></div>
 
@@ -187,7 +212,7 @@ body {
     </div>
 
     <p id="catchDescription">
-      Tik op de Monster Orb!
+      Je bent dichtbij!
     </p>
 
     <button
@@ -196,7 +221,7 @@ body {
     </button>
 
     <p id="catchText">
-      Vang het monster!
+      Tik op de Monster Orb!
     </p>
 
     <button
@@ -236,13 +261,16 @@ body {
 <script>
 
 // ==================================================
-// WERELD
+// BASIS
 // ==================================================
 
-const scene = new THREE.Scene();
+const scene =
+  new THREE.Scene();
 
 scene.background =
-  new THREE.Color(0x87ceeb);
+  new THREE.Color(
+    0x87ceeb
+  );
 
 
 // ==================================================
@@ -280,7 +308,10 @@ renderer.setSize(
 );
 
 renderer.setPixelRatio(
-  Math.min(window.devicePixelRatio, 2)
+  Math.min(
+    window.devicePixelRatio,
+    2
+  )
 );
 
 document
@@ -336,7 +367,7 @@ scene.add(ground);
 
 
 // ==================================================
-// WEG
+// WEGEN
 // ==================================================
 
 function createRoad(
@@ -366,15 +397,13 @@ function createRoad(
 
   road.position.set(
     x,
-    0.01,
+    0.02,
     z
   );
 
   scene.add(road);
 }
 
-
-// Horizontale weg
 createRoad(
   0,
   0,
@@ -382,8 +411,6 @@ createRoad(
   150
 );
 
-
-// Verticale weg
 createRoad(
   0,
   0,
@@ -406,8 +433,6 @@ function createTree(
     new THREE.Group();
 
 
-  // Stam
-
   const trunk =
     new THREE.Mesh(
       new THREE.CylinderGeometry(
@@ -425,8 +450,6 @@ function createTree(
 
   tree.add(trunk);
 
-
-  // Bladeren
 
   const leaves =
     new THREE.Mesh(
@@ -455,10 +478,7 @@ function createTree(
 }
 
 
-// Bomen plaatsen
-
-const treePositions = [
-
+[
   [-12,-12],
   [-18,-4],
   [-13,10],
@@ -471,75 +491,16 @@ const treePositions = [
   [30,0],
   [0,-25],
   [0,25]
-
-];
-
-
-treePositions.forEach(
-  position => {
-
-    createTree(
-      position[0],
-      position[1]
-    );
-
-  }
+].forEach(
+  p => createTree(
+    p[0],
+    p[1]
+  )
 );
 
 
 // ==================================================
-// ROTSEN
-// ==================================================
-
-function createRock(
-  x,
-  z
-) {
-
-  const rock =
-    new THREE.Mesh(
-      new THREE.DodecahedronGeometry(
-        0.8,
-        0
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0x777777
-      })
-    );
-
-  rock.position.set(
-    x,
-    0.7,
-    z
-  );
-
-  scene.add(rock);
-}
-
-
-createRock(
-  -8,
-  -8
-);
-
-createRock(
-  10,
-  -10
-);
-
-createRock(
-  9,
-  14
-);
-
-createRock(
-  -15,
-  16
-);
-
-
-// ==================================================
-// HUISJES
+// HUIZEN
 // ==================================================
 
 function createHouse(
@@ -550,8 +511,6 @@ function createHouse(
   const house =
     new THREE.Group();
 
-
-  // Huis
 
   const base =
     new THREE.Mesh(
@@ -569,8 +528,6 @@ function createHouse(
 
   house.add(base);
 
-
-  // Dak
 
   const roof =
     new THREE.Mesh(
@@ -590,29 +547,6 @@ function createHouse(
     Math.PI / 4;
 
   house.add(roof);
-
-
-  // Deur
-
-  const door =
-    new THREE.Mesh(
-      new THREE.BoxGeometry(
-        0.8,
-        1.5,
-        0.15
-      ),
-      new THREE.MeshStandardMaterial({
-        color: 0x553311
-      })
-    );
-
-  door.position.set(
-    0,
-    0.75,
-    -2.05
-  );
-
-  house.add(door);
 
 
   house.position.set(
@@ -662,13 +596,11 @@ scene.add(player);
 
 
 // ==================================================
-// MONSTERS
+// MONSTER FUNCTIE
 // ==================================================
 
 const monsters = [];
 
-
-// Monster maken
 
 function createMonster(
   name,
@@ -681,8 +613,6 @@ function createMonster(
   const monster =
     new THREE.Group();
 
-
-  // Lichaam
 
   const body =
     new THREE.Mesh(
@@ -700,8 +630,6 @@ function createMonster(
 
   monster.add(body);
 
-
-  // Ogen
 
   const eyeMaterial =
     new THREE.MeshStandardMaterial({
@@ -753,8 +681,6 @@ function createMonster(
   monster.add(rightEye);
 
 
-  // Pupillen
-
   const leftPupil =
     new THREE.Mesh(
       new THREE.SphereGeometry(
@@ -793,52 +719,6 @@ function createMonster(
   monster.add(rightPupil);
 
 
-  // Voeten
-
-  const footMaterial =
-    new THREE.MeshStandardMaterial({
-      color: 0xff5533
-    });
-
-
-  const leftFoot =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        0.3,
-        12,
-        12
-      ),
-      footMaterial
-    );
-
-  leftFoot.position.set(
-    -0.45,
-    0.3,
-    -0.1
-  );
-
-  monster.add(leftFoot);
-
-
-  const rightFoot =
-    new THREE.Mesh(
-      new THREE.SphereGeometry(
-        0.3,
-        12,
-        12
-      ),
-      footMaterial
-    );
-
-  rightFoot.position.set(
-    0.45,
-    0.3,
-    -0.1
-  );
-
-  monster.add(rightFoot);
-
-
   monster.position.set(
     x,
     0,
@@ -859,7 +739,9 @@ function createMonster(
 }
 
 
-// Drie eigen monsters
+// ==================================================
+// EERSTE MONSTERS
+// ==================================================
 
 createMonster(
   "Firebo",
@@ -869,7 +751,6 @@ createMonster(
   -8
 );
 
-
 createMonster(
   "Leafy",
   "🌿",
@@ -877,7 +758,6 @@ createMonster(
   -8,
   -10
 );
-
 
 createMonster(
   "Aquari",
@@ -917,7 +797,9 @@ joystick.addEventListener(
     event.preventDefault();
 
   },
-  { passive:false }
+  {
+    passive:false
+  }
 );
 
 
@@ -964,13 +846,19 @@ joystick.addEventListener(
       );
 
 
-    if (distance > max) {
+    if (
+      distance > max
+    ) {
 
       x =
-        x / distance * max;
+        x /
+        distance *
+        max;
 
       y =
-        y / distance * max;
+        y /
+        distance *
+        max;
 
     }
 
@@ -983,10 +871,12 @@ joystick.addEventListener(
 
 
     stick.style.transform =
-      `translate(${x}px, ${y}px)`;
+      `translate(${x}px,${y}px)`;
 
   },
-  { passive:false }
+  {
+    passive:false
+  }
 );
 
 
@@ -1007,7 +897,7 @@ joystick.addEventListener(
 
 
 // ==================================================
-// VANGEN
+// MONSTER AANTIKKEN
 // ==================================================
 
 let selectedMonster = null;
@@ -1015,7 +905,6 @@ let selectedMonster = null;
 
 const raycaster =
   new THREE.Raycaster();
-
 
 const mouse =
   new THREE.Vector2();
@@ -1058,18 +947,20 @@ renderer.domElement.addEventListener(
     );
 
 
-    const allObjects = [];
+    const objects = [];
 
 
     monsters.forEach(
       monster => {
 
-        if (!monster.userData.caught) {
+        if (
+          !monster.userData.caught
+        ) {
 
           monster.children.forEach(
             child => {
 
-              allObjects.push(
+              objects.push(
                 child
               );
 
@@ -1084,12 +975,14 @@ renderer.domElement.addEventListener(
 
     const hits =
       raycaster.intersectObjects(
-        allObjects,
+        objects,
         true
       );
 
 
-    if (hits.length === 0) {
+    if (
+      hits.length === 0
+    ) {
       return;
     }
 
@@ -1100,7 +993,9 @@ renderer.domElement.addEventListener(
 
     while (
       selected.parent &&
-      !monsters.includes(selected)
+      !monsters.includes(
+        selected
+      )
     ) {
 
       selected =
@@ -1110,7 +1005,9 @@ renderer.domElement.addEventListener(
 
 
     if (
-      !monsters.includes(selected)
+      !monsters.includes(
+        selected
+      )
     ) {
       return;
     }
@@ -1126,7 +1023,9 @@ renderer.domElement.addEventListener(
       );
 
 
-    if (distance <= 6) {
+    if (
+      distance <= 6
+    ) {
 
       openCatchScreen(
         selectedMonster
@@ -1135,7 +1034,7 @@ renderer.domElement.addEventListener(
     } else {
 
       showMessage(
-        "🚶 Je bent nog te ver weg!"
+        "🚶 Loop dichter naar het monster!"
       );
 
     }
@@ -1171,14 +1070,6 @@ function openCatchScreen(
 
   document
     .getElementById(
-      "catchText"
-    )
-    .innerText =
-    "Tik op de Monster Orb!";
-
-
-  document
-    .getElementById(
       "catchScreen"
     )
     .style.display =
@@ -1188,7 +1079,7 @@ function openCatchScreen(
 
 
 // ==================================================
-// MONSTER VANGEN
+// VANGEN
 // ==================================================
 
 document
@@ -1199,13 +1090,17 @@ document
     "click",
     function() {
 
-      if (!selectedMonster) {
+      if (
+        !selectedMonster
+      ) {
         return;
       }
 
 
       if (
-        selectedMonster.userData.caught
+        selectedMonster
+        .userData
+        .caught
       ) {
         return;
       }
@@ -1219,22 +1114,8 @@ document
         "✨ Vangen...";
 
 
-      const orb =
-        document.getElementById(
-          "orbButton"
-        );
-
-
-      orb.style.transform =
-        "scale(1.25)";
-
-
       setTimeout(
         function() {
-
-          orb.style.transform =
-            "scale(1)";
-
 
           selectedMonster
             .userData
@@ -1274,7 +1155,6 @@ document
             },
             1000
           );
-
 
         },
         700
@@ -1366,7 +1246,7 @@ function updateCollection() {
     collection.length === 0
   ) {
 
-    list.innerHTML =
+    list.innerText =
       "Je hebt nog geen monsters.";
 
     return;
@@ -1463,6 +1343,116 @@ document
 
 
 // ==================================================
+// GPS
+// ==================================================
+
+let gpsActive = false;
+
+let lastLatitude = null;
+let lastLongitude = null;
+
+
+function startGPS() {
+
+  if (
+    !navigator.geolocation
+  ) {
+
+    showMessage(
+      "❌ Deze browser ondersteunt geen GPS."
+    );
+
+    return;
+
+  }
+
+
+  document
+    .getElementById(
+      "locationStatus"
+    )
+    .innerText =
+    "GPS: wordt gestart...";
+
+
+  navigator.geolocation.watchPosition(
+
+    function(position) {
+
+      gpsActive = true;
+
+
+      lastLatitude =
+        position.coords.latitude;
+
+
+      lastLongitude =
+        position.coords.longitude;
+
+
+      document
+        .getElementById(
+          "locationStatus"
+        )
+        .innerText =
+        "📍 GPS actief";
+
+
+      // ======================================
+      // GPS wordt gekoppeld aan speler
+      // ======================================
+
+      // Kleine lokale bewegingen.
+      // Hierdoor blijft de speler bestuurbaar
+      // met de joystick.
+
+    },
+
+    function(error) {
+
+      gpsActive = false;
+
+
+      document
+        .getElementById(
+          "locationStatus"
+        )
+        .innerText =
+        "GPS: toestemming nodig";
+
+
+      showMessage(
+        "📍 Geef toestemming voor locatie."
+      );
+
+    },
+
+    {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 10000
+    }
+
+  );
+
+}
+
+
+document
+  .getElementById(
+    "gpsButton"
+  )
+  .addEventListener(
+    "click",
+    function() {
+
+      startGPS();
+
+    }
+  );
+
+
+// ==================================================
 // MELDING
 // ==================================================
 
@@ -1491,7 +1481,7 @@ function showMessage(
         "none";
 
     },
-    2000
+    2500
   );
 
 }
@@ -1508,7 +1498,7 @@ function animate() {
   );
 
 
-  // Bewegen
+  // Speler bewegen
 
   player.position.x +=
     joystickX * 0.12;
@@ -1555,7 +1545,7 @@ function animate() {
   );
 
 
-  // Monsters laten bewegen
+  // Monsters draaien
 
   monsters.forEach(
     monster => {
