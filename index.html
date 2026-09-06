@@ -13,7 +13,6 @@
       width: 100%;
       height: 100%;
       font-family: Arial, sans-serif;
-      background: #87ceeb;
       touch-action: none;
     }
 
@@ -28,91 +27,50 @@
       left: 10px;
       right: 10px;
       z-index: 10;
-      pointer-events: none;
     }
 
-    #title {
+    #title,
+    #locationStatus {
       display: inline-block;
-      background: rgba(0,0,0,0.65);
       color: white;
+      background: rgba(0,0,0,0.7);
       padding: 8px 12px;
       border-radius: 12px;
-      font-weight: bold;
+      margin-bottom: 5px;
     }
 
-    #gpsButton,
-    #collectionButton {
-      pointer-events: auto;
+    button {
       border: none;
       border-radius: 12px;
       padding: 10px 14px;
-      margin-top: 8px;
+      margin: 3px;
       font-size: 15px;
       font-weight: bold;
-      color: white;
+    }
+
+    #gpsButton {
       background: #333;
+      color: white;
     }
 
     #collectionButton {
       background: #7b3ff2;
-    }
-
-    #locationStatus {
       color: white;
-      background: rgba(0,0,0,0.6);
-      padding: 7px 10px;
-      border-radius: 10px;
-      margin-top: 6px;
-      display: inline-block;
-      font-size: 13px;
     }
 
     #message {
       position: fixed;
       left: 50%;
-      bottom: 135px;
+      bottom: 140px;
       transform: translateX(-50%);
       z-index: 20;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       color: white;
       padding: 12px 18px;
       border-radius: 14px;
       display: none;
       text-align: center;
       max-width: 80%;
-    }
-
-    #collection {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-      background: rgba(0,0,0,0.9);
-      color: white;
-      display: none;
-      padding: 25px;
-      box-sizing: border-box;
-      overflow-y: auto;
-    }
-
-    #collection h2 {
-      margin-top: 0;
-    }
-
-    .monsterCard {
-      background: #222;
-      border-radius: 15px;
-      padding: 15px;
-      margin: 10px 0;
-      font-size: 18px;
-    }
-
-    #closeCollection {
-      border: none;
-      background: #e74c3c;
-      color: white;
-      padding: 10px 15px;
-      border-radius: 10px;
-      font-weight: bold;
     }
 
     #joystick {
@@ -133,16 +91,43 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.8);
     }
 
+    #collection,
     #catchScreen {
       position: fixed;
       inset: 0;
-      z-index: 40;
-      background: rgba(20,20,20,0.95);
+      z-index: 30;
+      background: rgba(0,0,0,0.93);
       color: white;
       display: none;
+      box-sizing: border-box;
+    }
+
+    #collection {
+      padding: 25px;
+      overflow-y: auto;
+    }
+
+    #collection h2 {
+      margin-top: 0;
+    }
+
+    .monsterCard {
+      background: #222;
+      border-radius: 15px;
+      padding: 15px;
+      margin: 10px 0;
+      font-size: 18px;
+    }
+
+    #closeCollection {
+      background: #e74c3c;
+      color: white;
+    }
+
+    #catchScreen {
       align-items: center;
       justify-content: center;
       flex-direction: column;
@@ -152,16 +137,6 @@
     #catchMonster {
       font-size: 100px;
       margin: 20px;
-    }
-
-    #throwButton,
-    #cancelButton {
-      border: none;
-      border-radius: 15px;
-      padding: 14px 25px;
-      margin: 6px;
-      font-size: 18px;
-      font-weight: bold;
     }
 
     #throwButton {
@@ -205,227 +180,415 @@
 
 <div id="catchScreen">
   <h1>Een monster!</h1>
+
   <div id="catchMonster">👾</div>
-  <div id="catchName">Monster</div>
-  <button id="throwButton">🟠 Gooi Monster Orb</button>
-  <button id="cancelButton">Terug</button>
+
+  <h2 id="catchName">Monster</h2>
+
+  <button id="throwButton">
+    🟠 Gooi Monster Orb
+  </button>
+
+  <button id="cancelButton">
+    Terug
+  </button>
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 
 <script>
-/* =========================
-   BASIS
-========================= */
+
+/* =====================================
+   SCENE
+===================================== */
 
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0x87ceeb);
+scene.background =
+  new THREE.Color(0x87ceeb);
 
-const camera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
+const camera =
+  new THREE.PerspectiveCamera(
+    75,
+    window.innerWidth /
+    window.innerHeight,
+    0.1,
+    1000
+  );
+
+const renderer =
+  new THREE.WebGLRenderer({
+    antialias: true
+  });
+
+renderer.setSize(
+  window.innerWidth,
+  window.innerHeight
 );
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true
-});
+renderer.setPixelRatio(
+  Math.min(window.devicePixelRatio, 2)
+);
 
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+document
+  .getElementById("game")
+  .appendChild(renderer.domElement);
 
-document.getElementById("game").appendChild(renderer.domElement);
 
-
-/* =========================
+/* =====================================
    LICHT
-========================= */
+===================================== */
 
-const sunlight = new THREE.DirectionalLight(0xffffff, 1);
-sunlight.position.set(20, 30, 10);
+const sunlight =
+  new THREE.DirectionalLight(
+    0xffffff,
+    1
+  );
+
+sunlight.position.set(
+  20,
+  30,
+  10
+);
+
 scene.add(sunlight);
 
-const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-scene.add(ambient);
-
-
-/* =========================
-   GROND
-========================= */
-
-const groundGeometry = new THREE.PlaneGeometry(500, 500);
-const groundMaterial = new THREE.MeshLambertMaterial({
-  color: 0x4caf50
-});
-
-const ground = new THREE.Mesh(
-  groundGeometry,
-  groundMaterial
+scene.add(
+  new THREE.AmbientLight(
+    0xffffff,
+    0.6
+  )
 );
 
-ground.rotation.x = -Math.PI / 2;
+
+/* =====================================
+   GROND
+===================================== */
+
+const ground =
+  new THREE.Mesh(
+    new THREE.PlaneGeometry(
+      1000,
+      1000
+    ),
+    new THREE.MeshLambertMaterial({
+      color: 0x4caf50
+    })
+  );
+
+ground.rotation.x =
+  -Math.PI / 2;
+
 scene.add(ground);
 
 
-/* =========================
+/* =====================================
    WEG
-========================= */
+===================================== */
 
-const roadGeometry = new THREE.PlaneGeometry(15, 500);
+const road =
+  new THREE.Mesh(
+    new THREE.PlaneGeometry(
+      20,
+      1000
+    ),
+    new THREE.MeshLambertMaterial({
+      color: 0x555555
+    })
+  );
 
-const roadMaterial = new THREE.MeshLambertMaterial({
-  color: 0x555555
-});
+road.rotation.x =
+  -Math.PI / 2;
 
-const road = new THREE.Mesh(
-  roadGeometry,
-  roadMaterial
-);
-
-road.rotation.x = -Math.PI / 2;
-road.position.y = 0.01;
+road.position.y =
+  0.01;
 
 scene.add(road);
 
 
-/* =========================
+/* =====================================
    SPELER
-========================= */
+===================================== */
 
-const playerGeometry = new THREE.BoxGeometry(1.5, 2, 1.5);
+const player =
+  new THREE.Mesh(
+    new THREE.BoxGeometry(
+      1.5,
+      2,
+      1.5
+    ),
+    new THREE.MeshLambertMaterial({
+      color: 0x2196f3
+    })
+  );
 
-const playerMaterial = new THREE.MeshLambertMaterial({
-  color: 0x2196f3
-});
-
-const player = new THREE.Mesh(
-  playerGeometry,
-  playerMaterial
+player.position.set(
+  0,
+  1,
+  0
 );
-
-player.position.set(0, 1, 0);
 
 scene.add(player);
 
 
-/* =========================
-   MONSTERS
-========================= */
+/* =====================================
+   MONSTER TYPES
+===================================== */
+
+const monsterTypes = [
+
+  {
+    name: "Firebo",
+    emoji: "🔥",
+    color: 0xff5722
+  },
+
+  {
+    name: "Leafy",
+    emoji: "🌿",
+    color: 0x4caf50
+  },
+
+  {
+    name: "Aquari",
+    emoji: "💧",
+    color: 0x2196f3
+  },
+
+  {
+    name: "Voltix",
+    emoji: "⚡",
+    color: 0xffeb3b
+  },
+
+  {
+    name: "Rocko",
+    emoji: "🪨",
+    color: 0x795548
+  },
+
+  {
+    name: "Frosti",
+    emoji: "❄️",
+    color: 0x80deea
+  }
+
+];
+
+
+/* =====================================
+   MONSTERS ARRAY
+===================================== */
 
 const monsters = [];
 
-function createMonster(name, emoji, x, z) {
 
-  const geometry = new THREE.SphereGeometry(1.2, 24, 24);
+/* =====================================
+   MONSTER MAKEN
+===================================== */
 
-  let color = 0xff9800;
+function createMonster(
+  type,
+  x,
+  z
+) {
 
-  if (name === "Leafy") color = 0x4caf50;
-  if (name === "Aquari") color = 0x2196f3;
+  const geometry =
+    new THREE.SphereGeometry(
+      1.2,
+      24,
+      24
+    );
 
-  const material = new THREE.MeshLambertMaterial({
-    color: color
-  });
+  const material =
+    new THREE.MeshLambertMaterial({
+      color: type.color
+    });
 
-  const monster = new THREE.Mesh(
-    geometry,
-    material
+  const monster =
+    new THREE.Mesh(
+      geometry,
+      material
+    );
+
+  monster.position.set(
+    x,
+    1.2,
+    z
   );
 
-  monster.position.set(x, 1.2, z);
-
   monster.userData = {
-    name: name,
-    emoji: emoji,
+    name: type.name,
+    emoji: type.emoji,
     caught: false
   };
 
   scene.add(monster);
+
   monsters.push(monster);
+
+  return monster;
 }
 
 
-/* Eerste monsters */
+/* =====================================
+   START MONSTERS
+===================================== */
 
-createMonster("Firebo", "🔥", 8, -12);
-createMonster("Leafy", "🌿", -10, -25);
-createMonster("Aquari", "💧", 12, -40);
+createMonster(
+  monsterTypes[0],
+  8,
+  -12
+);
+
+createMonster(
+  monsterTypes[1],
+  -10,
+  -25
+);
+
+createMonster(
+  monsterTypes[2],
+  12,
+  -40
+);
 
 
-/* =========================
+/* =====================================
    BOMEN
-========================= */
+===================================== */
 
 function createTree(x, z) {
 
-  const trunk = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.4, 0.5, 2, 8),
-    new THREE.MeshLambertMaterial({
-      color: 0x795548
-    })
-  );
+  const trunk =
+    new THREE.Mesh(
+      new THREE.CylinderGeometry(
+        0.4,
+        0.5,
+        2,
+        8
+      ),
+      new THREE.MeshLambertMaterial({
+        color: 0x795548
+      })
+    );
 
-  trunk.position.set(x, 1, z);
+  trunk.position.set(
+    x,
+    1,
+    z
+  );
 
   scene.add(trunk);
 
-  const leaves = new THREE.Mesh(
-    new THREE.SphereGeometry(1.8, 12, 12),
-    new THREE.MeshLambertMaterial({
-      color: 0x2e7d32
-    })
-  );
 
-  leaves.position.set(x, 3, z);
+  const leaves =
+    new THREE.Mesh(
+      new THREE.SphereGeometry(
+        1.8,
+        12,
+        12
+      ),
+      new THREE.MeshLambertMaterial({
+        color: 0x2e7d32
+      })
+    );
+
+  leaves.position.set(
+    x,
+    3,
+    z
+  );
 
   scene.add(leaves);
 }
 
-for (let i = -100; i <= 100; i += 12) {
-  createTree(-12, i);
-  createTree(12, i + 6);
+
+/* =====================================
+   BOMEN PLAATSEN
+===================================== */
+
+for (
+  let z = -300;
+  z <= 300;
+  z += 15
+) {
+
+  createTree(-15, z);
+
+  createTree(
+    15,
+    z + 7
+  );
 }
 
 
-/* =========================
+/* =====================================
    HUIZEN
-========================= */
+===================================== */
 
 function createHouse(x, z) {
 
-  const house = new THREE.Mesh(
-    new THREE.BoxGeometry(5, 4, 5),
-    new THREE.MeshLambertMaterial({
-      color: 0xffcc80
-    })
-  );
+  const house =
+    new THREE.Mesh(
+      new THREE.BoxGeometry(
+        5,
+        4,
+        5
+      ),
+      new THREE.MeshLambertMaterial({
+        color: 0xffcc80
+      })
+    );
 
-  house.position.set(x, 2, z);
+  house.position.set(
+    x,
+    2,
+    z
+  );
 
   scene.add(house);
 
-  const roof = new THREE.Mesh(
-    new THREE.ConeGeometry(4, 2.5, 4),
-    new THREE.MeshLambertMaterial({
-      color: 0xd84315
-    })
+
+  const roof =
+    new THREE.Mesh(
+      new THREE.ConeGeometry(
+        4,
+        2.5,
+        4
+      ),
+      new THREE.MeshLambertMaterial({
+        color: 0xd84315
+      })
+    );
+
+  roof.position.set(
+    x,
+    5,
+    z
   );
 
-  roof.position.set(x, 5, z);
-  roof.rotation.y = Math.PI / 4;
+  roof.rotation.y =
+    Math.PI / 4;
 
   scene.add(roof);
 }
 
-createHouse(-22, -15);
-createHouse(22, -35);
+createHouse(
+  -25,
+  -20
+);
+
+createHouse(
+  25,
+  -50
+);
 
 
-/* =========================
+/* =====================================
    GPS
-========================= */
+===================================== */
 
 let gpsActive = false;
 
@@ -435,15 +598,21 @@ let gpsOriginLon = null;
 let gpsWatchId = null;
 
 const locationStatus =
-  document.getElementById("locationStatus");
+  document.getElementById(
+    "locationStatus"
+  );
 
 const gpsButton =
-  document.getElementById("gpsButton");
+  document.getElementById(
+    "gpsButton"
+  );
 
 
 function startGPS() {
 
-  if (!navigator.geolocation) {
+  if (
+    !navigator.geolocation
+  ) {
 
     locationStatus.textContent =
       "❌ GPS wordt niet ondersteund.";
@@ -451,8 +620,10 @@ function startGPS() {
     return;
   }
 
+
   locationStatus.textContent =
     "📡 GPS zoeken...";
+
 
   gpsWatchId =
     navigator.geolocation.watchPosition(
@@ -465,70 +636,72 @@ function startGPS() {
         const longitude =
           position.coords.longitude;
 
-        /*
-          Eerste GPS-positie wordt het startpunt.
 
-          De GPS-gegevens blijven alleen in deze browser.
-        */
+        /* Eerste positie */
 
-        if (gpsOriginLat === null) {
+        if (
+          gpsOriginLat === null
+        ) {
 
-          gpsOriginLat = latitude;
-          gpsOriginLon = longitude;
+          gpsOriginLat =
+            latitude;
+
+          gpsOriginLon =
+            longitude;
 
           locationStatus.textContent =
             "✅ GPS actief";
+
+          /*
+            Bij de eerste GPS-locatie
+            verschijnen monsters rondom jou.
+          */
+
+          spawnGPSMonsters();
         }
 
 
-        /*
-          Zet GPS om naar meters.
+        const metersPerDegree =
+          111320;
 
-          Ongeveer:
-          1 graad breedte = 111.320 meter
-        */
-
-        const metersPerDegree = 111320;
 
         const latitudeMeters =
-          (latitude - gpsOriginLat) *
+          (latitude -
+            gpsOriginLat) *
           metersPerDegree;
 
+
         const longitudeMeters =
-          (longitude - gpsOriginLon) *
+          (longitude -
+            gpsOriginLon) *
           metersPerDegree *
           Math.cos(
-            gpsOriginLat * Math.PI / 180
+            gpsOriginLat *
+            Math.PI / 180
           );
 
 
         /*
-          Schaal:
-
-          5 meter in de echte wereld
-          = ongeveer 1 game-unit
+          5 meter = 1 game-unit
         */
 
         const scale = 5;
 
-        const worldX =
-          longitudeMeters / scale;
 
-        const worldZ =
-          -latitudeMeters / scale;
+        player.position.x =
+          longitudeMeters /
+          scale;
 
 
-        /*
-          GPS bestuurt nu de speler.
-        */
-
-        player.position.x = worldX;
-        player.position.z = worldZ;
+        player.position.z =
+          -latitudeMeters /
+          scale;
 
 
         locationStatus.textContent =
           "📍 GPS actief";
       },
+
 
       function(error) {
 
@@ -538,12 +711,14 @@ function startGPS() {
         console.log(error);
       },
 
+
       {
         enableHighAccuracy: true,
         maximumAge: 1000,
         timeout: 10000
       }
     );
+
 
   gpsActive = true;
 
@@ -558,17 +733,94 @@ gpsButton.addEventListener(
 );
 
 
-/* =========================
+/* =====================================
+   GPS MONSTERS SPAWNEN
+===================================== */
+
+function spawnGPSMonsters() {
+
+  /*
+    We maken 8 monsters
+    op verschillende plekken
+    rondom de speler.
+  */
+
+  for (
+    let i = 0;
+    i < 8;
+    i++
+  ) {
+
+    const type =
+      monsterTypes[
+        Math.floor(
+          Math.random() *
+          monsterTypes.length
+        )
+      ];
+
+
+    /*
+      Tussen ongeveer
+      10 en 60 game-units.
+
+      Omdat 5 meter = 1 game-unit,
+      staan ze ongeveer
+      50 tot 300 meter verderop.
+    */
+
+    const angle =
+      Math.random() *
+      Math.PI * 2;
+
+
+    const distance =
+      10 +
+      Math.random() * 50;
+
+
+    const x =
+      player.position.x +
+      Math.cos(angle) *
+      distance;
+
+
+    const z =
+      player.position.z +
+      Math.sin(angle) *
+      distance;
+
+
+    createMonster(
+      type,
+      x,
+      z
+    );
+  }
+
+
+  showMessage(
+    "👾 Er zijn nieuwe monsters in de buurt!"
+  );
+}
+
+
+/* =====================================
    JOYSTICK
-========================= */
+===================================== */
 
 const joystick =
-  document.getElementById("joystick");
+  document.getElementById(
+    "joystick"
+  );
 
 const stick =
-  document.getElementById("stick");
+  document.getElementById(
+    "stick"
+  );
 
-let joystickActive = false;
+let joystickActive =
+  false;
 
 let joystickX = 0;
 let joystickY = 0;
@@ -578,11 +830,15 @@ joystick.addEventListener(
   "touchstart",
   function(event) {
 
-    joystickActive = true;
+    joystickActive =
+      true;
 
     event.preventDefault();
+
   },
-  { passive: false }
+  {
+    passive: false
+  }
 );
 
 
@@ -590,50 +846,83 @@ joystick.addEventListener(
   "touchmove",
   function(event) {
 
-    if (!joystickActive) return;
+    if (
+      !joystickActive
+    ) return;
+
 
     const touch =
       event.touches[0];
 
+
     const rect =
       joystick.getBoundingClientRect();
 
+
     let x =
       touch.clientX -
-      (rect.left + rect.width / 2);
+      (
+        rect.left +
+        rect.width / 2
+      );
+
 
     let y =
       touch.clientY -
-      (rect.top + rect.height / 2);
+      (
+        rect.top +
+        rect.height / 2
+      );
 
-    const maxDistance = 35;
+
+    const maxDistance =
+      35;
+
 
     const distance =
-      Math.sqrt(x*x + y*y);
+      Math.sqrt(
+        x*x +
+        y*y
+      );
 
-    if (distance > maxDistance) {
+
+    if (
+      distance >
+      maxDistance
+    ) {
 
       x =
-        x / distance *
+        x /
+        distance *
         maxDistance;
 
       y =
-        y / distance *
+        y /
+        distance *
         maxDistance;
     }
 
+
     joystickX =
-      x / maxDistance;
+      x /
+      maxDistance;
+
 
     joystickY =
-      y / maxDistance;
+      y /
+      maxDistance;
+
 
     stick.style.transform =
       `translate(${x}px, ${y}px)`;
 
+
     event.preventDefault();
+
   },
-  { passive: false }
+  {
+    passive: false
+  }
 );
 
 
@@ -641,7 +930,8 @@ joystick.addEventListener(
   "touchend",
   function() {
 
-    joystickActive = false;
+    joystickActive =
+      false;
 
     joystickX = 0;
     joystickY = 0;
@@ -652,20 +942,27 @@ joystick.addEventListener(
 );
 
 
-/* =========================
-   MONSTER KLIKKEN
-========================= */
+/* =====================================
+   VANGSCHERM
+===================================== */
 
-let selectedMonster = null;
+let selectedMonster =
+  null;
 
 const catchScreen =
-  document.getElementById("catchScreen");
+  document.getElementById(
+    "catchScreen"
+  );
 
 const catchMonster =
-  document.getElementById("catchMonster");
+  document.getElementById(
+    "catchMonster"
+  );
 
 const catchName =
-  document.getElementById("catchName");
+  document.getElementById(
+    "catchName"
+  );
 
 
 renderer.domElement.addEventListener(
@@ -675,114 +972,148 @@ renderer.domElement.addEventListener(
     const touch =
       event.touches[0];
 
+
     const mouse =
       new THREE.Vector2();
 
+
     mouse.x =
-      (touch.clientX /
-      window.innerWidth) * 2 - 1;
+      (
+        touch.clientX /
+        window.innerWidth
+      ) * 2 - 1;
+
 
     mouse.y =
-      -(touch.clientY /
-      window.innerHeight) * 2 + 1;
+      -(
+        touch.clientY /
+        window.innerHeight
+      ) * 2 + 1;
+
 
     const raycaster =
       new THREE.Raycaster();
+
 
     raycaster.setFromCamera(
       mouse,
       camera
     );
 
+
     const hits =
       raycaster.intersectObjects(
         monsters
       );
 
-    if (hits.length > 0) {
 
-      const monster =
-        hits[0].object;
+    if (
+      hits.length === 0
+    ) return;
 
-      if (monster.userData.caught)
-        return;
 
-      const distance =
-        player.position.distanceTo(
-          monster.position
-        );
+    const monster =
+      hits[0].object;
 
-      if (distance < 8) {
 
-        selectedMonster =
-          monster;
+    if (
+      monster.userData.caught
+    ) return;
 
-        catchMonster.textContent =
-          monster.userData.emoji;
 
-        catchName.textContent =
-          monster.userData.name;
+    const distance =
+      player.position.distanceTo(
+        monster.position
+      );
 
-        catchScreen.style.display =
-          "flex";
-      }
 
-      else {
+    if (
+      distance < 8
+    ) {
 
-        showMessage(
-          "🚶 Ga wat dichter bij het monster!"
-        );
-      }
+      selectedMonster =
+        monster;
+
+
+      catchMonster.textContent =
+        monster.userData.emoji;
+
+
+      catchName.textContent =
+        monster.userData.name;
+
+
+      catchScreen.style.display =
+        "flex";
     }
+
+    else {
+
+      showMessage(
+        "🚶 Ga dichter naar het monster!"
+      );
+    }
+
   }
 );
 
 
-/* =========================
+/* =====================================
    VANGEN
-========================= */
-
-const throwButton =
-  document.getElementById("throwButton");
-
-throwButton.addEventListener(
-  "click",
-  function() {
-
-    if (!selectedMonster)
-      return;
-
-    selectedMonster.userData.caught =
-      true;
-
-    selectedMonster.visible =
-      false;
-
-    saveMonster(
-      selectedMonster.userData.name,
-      selectedMonster.userData.emoji
-    );
-
-    catchScreen.style.display =
-      "none";
-
-    showMessage(
-      "🎉 Je hebt " +
-      selectedMonster.userData.name +
-      " gevangen!"
-    );
-
-    selectedMonster = null;
-  }
-);
-
-
-/* =========================
-   ANNULEREN
-========================= */
+===================================== */
 
 document
-  .getElementById("cancelButton")
+  .getElementById(
+    "throwButton"
+  )
+  .addEventListener(
+    "click",
+    function() {
+
+      if (
+        !selectedMonster
+      ) return;
+
+
+      selectedMonster.userData.caught =
+        true;
+
+
+      selectedMonster.visible =
+        false;
+
+
+      saveMonster(
+        selectedMonster.userData.name,
+        selectedMonster.userData.emoji
+      );
+
+
+      catchScreen.style.display =
+        "none";
+
+
+      showMessage(
+        "🎉 Je hebt " +
+        selectedMonster.userData.name +
+        " gevangen!"
+      );
+
+
+      selectedMonster =
+        null;
+    }
+  );
+
+
+/* =====================================
+   ANNULEREN
+===================================== */
+
+document
+  .getElementById(
+    "cancelButton"
+  )
   .addEventListener(
     "click",
     function() {
@@ -790,14 +1121,15 @@ document
       catchScreen.style.display =
         "none";
 
-      selectedMonster = null;
+      selectedMonster =
+        null;
     }
   );
 
 
-/* =========================
-   MONSTERS OPSLAAN
-========================= */
+/* =====================================
+   OPSLAAN
+===================================== */
 
 function getCollection() {
 
@@ -809,68 +1141,93 @@ function getCollection() {
 }
 
 
-function saveMonster(name, emoji) {
+function saveMonster(
+  name,
+  emoji
+) {
 
   const collection =
     getCollection();
+
 
   collection.push({
     name: name,
     emoji: emoji
   });
 
+
   localStorage.setItem(
     "mijnMonsters",
-    JSON.stringify(collection)
+    JSON.stringify(
+      collection
+    )
   );
 }
 
 
-/* =========================
+/* =====================================
    COLLECTIE
-========================= */
+===================================== */
 
 const collection =
-  document.getElementById("collection");
+  document.getElementById(
+    "collection"
+  );
 
 const monsterList =
-  document.getElementById("monsterList");
+  document.getElementById(
+    "monsterList"
+  );
 
 
 document
-  .getElementById("collectionButton")
+  .getElementById(
+    "collectionButton"
+  )
   .addEventListener(
     "click",
     function() {
 
-      monsterList.innerHTML = "";
+      monsterList.innerHTML =
+        "";
+
 
       const saved =
         getCollection();
 
-      if (saved.length === 0) {
+
+      if (
+        saved.length === 0
+      ) {
 
         monsterList.innerHTML =
           "<p>Je hebt nog geen monsters.</p>";
 
       } else {
 
-        saved.forEach(function(monster) {
+        saved.forEach(
+          function(monster) {
 
-          const card =
-            document.createElement("div");
+            const card =
+              document.createElement(
+                "div"
+              );
 
-          card.className =
-            "monsterCard";
+            card.className =
+              "monsterCard";
 
-          card.textContent =
-            monster.emoji +
-            " " +
-            monster.name;
+            card.textContent =
+              monster.emoji +
+              " " +
+              monster.name;
 
-          monsterList.appendChild(card);
-        });
+            monsterList.appendChild(
+              card
+            );
+          }
+        );
       }
+
 
       collection.style.display =
         "block";
@@ -879,7 +1236,9 @@ document
 
 
 document
-  .getElementById("closeCollection")
+  .getElementById(
+    "closeCollection"
+  )
   .addEventListener(
     "click",
     function() {
@@ -890,20 +1249,27 @@ document
   );
 
 
-/* =========================
+/* =====================================
    MELDING
-========================= */
+===================================== */
 
-function showMessage(text) {
+function showMessage(
+  text
+) {
 
   const message =
-    document.getElementById("message");
+    document.getElementById(
+      "message"
+    );
+
 
   message.textContent =
     text;
 
+
   message.style.display =
     "block";
+
 
   setTimeout(
     function() {
@@ -917,9 +1283,9 @@ function showMessage(text) {
 }
 
 
-/* =========================
-   CAMERA + BEWEGING
-========================= */
+/* =====================================
+   GAME LOOP
+===================================== */
 
 function animate() {
 
@@ -929,14 +1295,13 @@ function animate() {
 
 
   /*
-    Als GPS NIET actief is,
-    werkt de joystick.
-
-    Als GPS WEL actief is,
-    bestuurt GPS de speler.
+    Zonder GPS:
+    joystick gebruiken.
   */
 
-  if (!gpsActive) {
+  if (
+    !gpsActive
+  ) {
 
     player.position.x +=
       joystickX * 0.15;
@@ -968,23 +1333,30 @@ function animate() {
 
 
   /*
-    Monsters zweven een beetje.
+    Monsters bewegen
+    een beetje.
   */
 
   monsters.forEach(
     function(monster) {
 
-      if (!monster.visible)
-        return;
+      if (
+        !monster.visible
+      ) return;
 
-      monster.rotation.y += 0.01;
+
+      monster.rotation.y +=
+        0.01;
+
 
       monster.position.y =
         1.2 +
         Math.sin(
-          Date.now() * 0.003 +
+          Date.now() *
+          0.003 +
           monster.position.x
-        ) * 0.15;
+        ) *
+        0.15;
     }
   );
 
@@ -995,12 +1367,13 @@ function animate() {
   );
 }
 
+
 animate();
 
 
-/* =========================
-   SCHERM GROOTTE
-========================= */
+/* =====================================
+   RESIZE
+===================================== */
 
 window.addEventListener(
   "resize",
@@ -1010,7 +1383,9 @@ window.addEventListener(
       window.innerWidth /
       window.innerHeight;
 
+
     camera.updateProjectionMatrix();
+
 
     renderer.setSize(
       window.innerWidth,
